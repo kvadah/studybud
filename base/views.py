@@ -3,13 +3,6 @@ from .models import Room
 from .form import RoomForm
 # Create your views here.
 
-rooms = [
-    {'id': 1, 'name': "Web Design"},
-    {'id': 2, 'name': "Artificial Inteligence"},
-    {'id': 3, 'name': "Django Development"}
-
-]
-
 
 def home(request):
     rooms = Room.objects.all()
@@ -27,6 +20,19 @@ def createRoom(request):
     form = RoomForm
     if request.method == 'POST':
         form = RoomForm(request.POST)
+        if form.is_valid:
+            form.save()
+            return redirect('home')
+
+    context = {'form': form}
+    return render(request, 'base/create_room.html', context)
+
+
+def updateRoom(request, pk):
+    room = Room.objects.get(id=pk)
+    form = RoomForm(instance=room)
+    if request.method == 'POST':
+        form = RoomForm(request.POST, instance=room)
         if form.is_valid:
             form.save()
             return redirect('home')
