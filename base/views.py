@@ -7,10 +7,12 @@ from django.db.models import Q
 from .form import RoomForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
 # Create your views here.
 
 
 def loginPage(request):
+    page = 'login'
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -25,7 +27,26 @@ def loginPage(request):
         else:
             messages.error(request, 'wrong username or password ')
 
-    context = {}
+    context = {'page': page}
+    return render(request, 'base/login_register.html', context)
+
+
+def registerPage(request):
+    form = UserCreationForm()
+    context = {'form': form}
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            print('nothing happend')
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.save()
+            login(request, user)
+            return redirect('home')
+
+        else:
+            print('an error occured')
+            messages.error(request, 'an error occurred during registration ')
     return render(request, 'base/login_register.html', context)
 
 
