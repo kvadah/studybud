@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect
 from .models import Room, Topic
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
+from django.http import HttpResponse
 from django.db.models import Q
 from .form import RoomForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 
@@ -52,6 +54,7 @@ def room(request, pk):
     return render(request, "room.html", context)
 
 
+@login_required(login_url='login')
 def createRoom(request):
     form = RoomForm
     if request.method == 'POST':
@@ -67,6 +70,9 @@ def createRoom(request):
 def updateRoom(request, pk):
     room = Room.objects.get(id=pk)
     form = RoomForm(instance=room)
+
+    if request.user != room.host:
+        return HttpResponse('not allowed in this page')
     if request.method == 'POST':
         form = RoomForm(request.POST, instance=room)
         if form.is_valid:
